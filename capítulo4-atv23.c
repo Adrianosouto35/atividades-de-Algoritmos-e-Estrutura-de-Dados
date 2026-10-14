@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define VALOR_BONUS 20 // Regra de bonificacao da Atividade 23
+#define VALOR_BONUS 20
 
 typedef struct {
     int identificador;
@@ -10,9 +10,6 @@ typedef struct {
     int pontuacao;
 } Partida;
 
-// ============================================================================
-// ATIVIDADE 21 & 22: Escrita em arquivo (Modo Append)
-// ============================================================================
 int salvarPartidas(const Partida partidas[], int quantidade) {
     FILE *arquivo = fopen("partidas.txt", "a");
 
@@ -41,7 +38,6 @@ int salvarPartidas(const Partida partidas[], int quantidade) {
     return 1;
 }
 
-// Auxiliar para validar registros malformados (reutilizado nas Atividades 22 e 23)
 int validarEParserLinha(const char *buffer, Partida *partida) {
     char extra;
     int resultado = sscanf(buffer, "%d;%49[^;];%d",
@@ -49,20 +45,16 @@ int validarEParserLinha(const char *buffer, Partida *partida) {
                            partida->jogador,
                            &partida->pontuacao);
 
-    // Deve ler exatamente 3 campos e NAO ter caracteres extras no final da linha
     if (resultado == 3 && sscanf(buffer, "%d;%49[^;];%d %c",
                                 &partida->identificador,
                                 partida->jogador,
                                 &partida->pontuacao,
                                 &extra) != 4) {
-        return 1; // Registro valido
+        return 1;
     }
-    return 0; // Registro malformado
+    return 0;
 }
 
-// ============================================================================
-// ATIVIDADE 22: Leitura e listagem do historico
-// ============================================================================
 void listarHistorico(void) {
     FILE *arquivo = fopen("partidas.txt", "r");
 
@@ -113,11 +105,7 @@ void listarHistorico(void) {
     fclose(arquivo);
 }
 
-// ============================================================================
-// ATIVIDADE 23: Transformação entre arquivos e Bonificação
-// ============================================================================
 void gerarRelatorioBonificado(void) {
-    // Requisito 1 & 2: Verificar retorno de fopen com mensagens especificas
     FILE *origem = fopen("partidas.txt", "r");
     if (origem == NULL) {
         printf("Erro: Arquivo de origem (partidas.txt) nao encontrado ou sem permissao.\n");
@@ -127,7 +115,6 @@ void gerarRelatorioBonificado(void) {
     FILE *destino = fopen("relatorio_bonificado.txt", "w");
     if (destino == NULL) {
         printf("Erro: Nao foi possivel criar o arquivo de destino (relatorio_bonificado.txt).\n");
-        // Requisito 5: Fechar origem se o destino falhar
         fclose(origem);
         return;
     }
@@ -142,7 +129,6 @@ void gerarRelatorioBonificado(void) {
     while (fgets(buffer, sizeof(buffer), origem) != NULL) {
         linha++;
 
-        // Tratamento de linha que excede o buffer
         if (strchr(buffer, '\n') == NULL && !feof(origem)) {
             int caractere;
             while ((caractere = fgetc(origem)) != '\n' && caractere != EOF) {}
@@ -150,12 +136,9 @@ void gerarRelatorioBonificado(void) {
             continue;
         }
 
-        // Requisito 3: Processar apenas quando a leitura for completa
         if (validarEParserLinha(buffer, &partida)) {
-            // Aplicacao da regra de bonificacao
             partida.pontuacao += VALOR_BONUS;
 
-            // Requisito 4: Escrever no arquivo destino
             if (fprintf(destino, "%d;%s;%d\n",
                         partida.identificador,
                         partida.jogador,
@@ -167,26 +150,21 @@ void gerarRelatorioBonificado(void) {
         }
     }
 
-    // Requisito 6: Apresentar a quantidade de registros processados
     printf("Processamento concluido!\n");
     printf("Total de registros gravados com bonus: %d\n", processados);
 
-    // Requisito 5: Fechar ambos os arquivos no caminho de sucesso
     fclose(origem);
     fclose(destino);
 }
 
-// ============================================================================
-// MENU PRINCIPAL (Integrando todas as Atividades)
-// ============================================================================
 int main(void) {
     int opcao;
 
     do {
         printf("\n=== GERENCIADOR DE PARTIDAS ===\n");
-        printf("1 - Registrar partida (Atv 21/22)\n");
-        printf("2 - Listar historico (Atv 22)\n");
-        printf("3 - Gerar relatorio bonificado (Atv 23)\n");
+        printf("1 - Registrar partida\n");
+        printf("2 - Listar historico\n");
+        printf("3 - Gerar relatorio bonificado\n");
         printf("0 - Sair\n");
         printf("Opcao: ");
 
